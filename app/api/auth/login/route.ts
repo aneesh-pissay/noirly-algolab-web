@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('Login error:', error);
     return NextResponse.json(
-      { error: 'Login failed. Please try again.' },
+      { error: 'Login failed. Please try again.', message: error },
       { status: 500 }
     );
   }
