@@ -33,8 +33,8 @@ export default function VisualizerPage({ params }: PageProps) {
     <>
       <Sidebar />
       <Header />
-      <main className="ml-[240px] min-h-screen bg-background pt-16">
-        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-[1600px] flex-col gap-4 p-6">
+      <main className="app-main">
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-[1600px] flex-col gap-4 p-4 sm:p-6">
           <Breadcrumbs items={breadcrumbs} />
           <UniversalVisualizer algorithmId={algorithmId} />
         </div>

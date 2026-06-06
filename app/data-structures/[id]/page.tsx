@@ -21,8 +21,8 @@ export default async function DataStructureDetailsPage({
       <Sidebar />
       <Header />
 
-      <main className="ml-[240px] pt-16 h-screen overflow-y-auto bg-background">
-        <div className="max-w-[1200px] mx-auto p-8 space-y-8">
+      <main className="app-main h-screen overflow-y-auto">
+        <div className="mx-auto max-w-[1200px] space-y-8 p-4 sm:p-8">
           <Breadcrumbs
             items={[
               { label: 'Dashboard', href: '/learn-path' },

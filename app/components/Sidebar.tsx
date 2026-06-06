@@ -1,7 +1,10 @@
-"use client";
+'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { useMobileNav } from '../contexts/MobileNavContext';
+import BrandMark from './BrandMark';
 
 const navItems = [
   { label: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
@@ -10,45 +13,56 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { isOpen, close } = useMobileNav();
+
+  useEffect(() => {
+    close();
+  }, [pathname, close]);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
       return pathname === '/dashboard';
     }
-
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-[60] flex h-full w-[240px] flex-col gap-2 border-r border-outline-variant/40 bg-surface-container p-4">
-      <div className="flex items-center gap-3 px-2 mb-8">
-        <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-on-primary">
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-            science
-          </span>
-        </div>
-        <div>
-          <h1 className="font-display text-headline-md font-bold text-primary leading-none">Noirly AlgoLab</h1>
-          <p className="text-[10px] uppercase tracking-widest text-on-surface-variant/60">Visual DSA Learning</p>
-        </div>
-      </div>
+    <>
+      {isOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          className="fixed inset-0 z-[65] bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={close}
+        />
+      )}
 
-      <nav className="flex-1 space-y-1">
-        {navItems.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors cursor-pointer active:scale-95 duration-200 font-display text-body-md ${
-              isActive(item.href)
-                ? 'bg-primary/10 text-primary border border-primary/20'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'
-            }`}
-          >
-            <span className="material-symbols-outlined">{item.icon}</span>
-            {item.label}
-          </Link>
-        ))}
-      </nav>
-    </aside>
+      <aside
+        className={`fixed left-0 top-0 z-[70] flex h-full w-[min(280px,85vw)] flex-col gap-2 border-r border-outline-variant/40 bg-surface-container p-4 transition-transform duration-300 ease-out lg:w-[240px] lg:translate-x-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        <div className="mb-6 w-full shrink-0 px-0.5">
+          <BrandMark variant="sidebar" href="/dashboard" />
+        </div>
+
+        <nav className="flex-1 space-y-1">
+          {navItems.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 font-display text-body-md transition-colors duration-200 active:scale-95 ${
+                isActive(item.href)
+                  ? 'border border-primary/20 bg-primary/10 text-primary'
+                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'
+              }`}
+            >
+              <span className="material-symbols-outlined">{item.icon}</span>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+      </aside>
+    </>
   );
 }

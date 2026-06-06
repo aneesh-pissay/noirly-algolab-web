@@ -15,8 +15,17 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Noirly AlgoLab | Visual DSA Learning",
-  description: "Don't memorize algorithms. Understand them visually.",
+  title: "Noirly AlgoLab | Visualize logic. Master algorithms.",
+  description: "Visualize logic. Master algorithms.",
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({

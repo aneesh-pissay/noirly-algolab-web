@@ -113,7 +113,7 @@ export default function SettingsPage() {
       <Sidebar />
       <Header />
 
-      <main className="ml-[240px] min-h-screen bg-background pt-16">
+      <main className="app-main">
         <div className="mx-auto max-w-[760px] space-y-6 p-8">
           <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Settings' }]} />
 

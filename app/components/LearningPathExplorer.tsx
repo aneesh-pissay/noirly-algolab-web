@@ -223,8 +223,8 @@ export default function LearningPathExplorer() {
     <>
       <Sidebar />
       <Header />
-      <main className="ml-[240px] min-h-screen bg-background pt-16">
-        <div className="mx-auto max-w-[1300px] space-y-6 p-8">
+      <main className="app-main">
+        <div className="mx-auto max-w-[1300px] space-y-6 p-4 sm:p-6 lg:p-8">
           <Breadcrumbs items={breadcrumbItems} />
 
           <section className="space-y-2">
@@ -238,7 +238,7 @@ export default function LearningPathExplorer() {
                 </button>
               )}
               <div>
-                <h1 className="font-display text-4xl font-extrabold text-on-surface">
+                <h1 className="font-display text-2xl font-extrabold text-on-surface sm:text-3xl lg:text-4xl">
                   Learning <span className="text-primary">Path</span>
                 </h1>
                 <p className="text-sm text-on-surface-variant">

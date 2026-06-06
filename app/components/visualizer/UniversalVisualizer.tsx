@@ -202,14 +202,14 @@ export default function UniversalVisualizer({ algorithmId }: Props) {
               onSpeedChange={(s) => visualizerEngine.setSpeed(s)}
             />
             {atFinalStep && (
-              <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-4 py-3">
+              <div className="flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-on-surface-variant">
                   Visualization complete — take the quiz to finish this lesson.
                 </p>
                 <button
                   type="button"
                   onClick={() => setActiveStep('quiz')}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary/40 bg-primary/20 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/30"
+                  className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/20 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/30 sm:w-auto"
                 >
                   Go to Quiz <ArrowRight size={14} />
                 </button>

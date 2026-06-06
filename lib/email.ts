@@ -1,43 +1,94 @@
 import nodemailer from 'nodemailer';
+import type SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { BRAND_NAME, BRAND_TAGLINE } from '@/lib/brand';
 import { darkPalette } from '@/lib/theme-colors';
 
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 const EMAIL_FROM = process.env.EMAIL_FROM || 'noreply@noirly-codelab.com';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
-const BRAND_NAME = 'Noirly AlgoLab';
-const BRAND_TAGLINE = 'Visual DSA Learning';
+const SMTP_HOST = process.env.SMTP_HOST || 'smtpout.secureserver.net';
+const SMTP_DEBUG = process.env.SMTP_DEBUG === 'true';
+const IS_DEV = process.env.NODE_ENV === 'development';
 
 const c = darkPalette;
 
-const transporter = nodemailer.createTransport({
-  host: 'smtpout.secureserver.net',
-  port: 465,
-  secure: true,
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-    minVersion: 'TLSv1.2',
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-  debug: true,
-  logger: true,
-});
+function smtpPortsToTry(): number[] {
+  const preferred = Number(process.env.SMTP_PORT || 587);
+  const fallbacks = preferred === 465 ? [587] : [465];
+  return [...new Set([preferred, ...fallbacks])];
+}
 
-transporter.verify((error) => {
-  if (error) {
-    console.error('❌ Email transporter verification failed:', error.message);
-    console.log('💡 Email sending will be skipped. Check your SMTP settings.');
-  } else {
-    console.log('✅ Email server is ready to send messages');
+function createSmtpTransport(port: number) {
+  const secure = port === 465;
+  const options: SMTPTransport.Options = {
+    host: SMTP_HOST,
+    port,
+    secure,
+    auth:
+      EMAIL_USER && EMAIL_PASSWORD
+        ? { user: EMAIL_USER, pass: EMAIL_PASSWORD }
+        : undefined,
+    requireTLS: port === 587,
+    tls: {
+      rejectUnauthorized: false,
+      minVersion: 'TLSv1.2',
+    },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 15000,
+    ...(SMTP_DEBUG ? { debug: true, logger: true } : {}),
+  };
+  return nodemailer.createTransport(options);
+}
+
+function logDevActionLink(label: string, url: string) {
+  if (!IS_DEV) return;
+  console.log(`\n📧 [DEV] SMTP unavailable — ${label}`);
+  console.log(`🔗 ${url}\n`);
+}
+
+async function sendMailWithFallback(
+  mailOptions: nodemailer.SendMailOptions,
+  devActionUrl?: string
+): Promise<nodemailer.SentMessageInfo> {
+  if (!EMAIL_USER || !EMAIL_PASSWORD) {
+    if (devActionUrl) logDevActionLink('copy this link manually', devActionUrl);
+    throw new Error('Email credentials are not configured (EMAIL_USER / EMAIL_PASSWORD)');
   }
-});
+
+  const ports = smtpPortsToTry();
+  let lastError: Error | null = null;
+
+  for (const port of ports) {
+    try {
+      const transporter = createSmtpTransport(port);
+      const info = await transporter.sendMail(mailOptions);
+      if (SMTP_DEBUG) {
+        console.log(`✅ Email sent via ${SMTP_HOST}:${port}`);
+      }
+      return info;
+    } catch (error: unknown) {
+      const err = error as Error & { code?: string };
+      lastError = err;
+      const retryable =
+        err.code === 'ESOCKET' ||
+        err.code === 'ECONNECTION' ||
+        err.code === 'ECONNRESET' ||
+        err.code === 'ETIMEDOUT';
+      const hasMore = port !== ports[ports.length - 1];
+      if (retryable && hasMore) {
+        console.warn(`⚠️ SMTP ${SMTP_HOST}:${port} failed (${err.message}). Trying port ${ports[ports.indexOf(port) + 1]}...`);
+        continue;
+      }
+      break;
+    }
+  }
+
+  if (devActionUrl) logDevActionLink('copy this link manually', devActionUrl);
+
+  throw lastError ?? new Error('Failed to send email');
+}
 
 /** Prefer first name, then a readable name from email, otherwise a neutral greeting. */
 export function formatGreetingName(
@@ -97,11 +148,11 @@ function buildEmailHtml({
                 <table role="presentation" cellspacing="0" cellpadding="0">
                   <tr>
                     <td style="vertical-align:middle;padding-right:12px;">
-                      <div style="width:40px;height:40px;border-radius:10px;background-color:${c.primary};text-align:center;line-height:40px;font-size:20px;">🧪</div>
+                      <img src="${APP_URL}/logo.png" alt="" width="48" height="48" style="display:block;width:48px;height:48px;object-fit:contain;border-radius:10px;" />
                     </td>
                     <td style="vertical-align:middle;">
-                      <p style="margin:0;font-size:18px;font-weight:700;color:${c.primary};">${BRAND_NAME}</p>
-                      <p style="margin:2px 0 0;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:${c.onSurfaceVariant};">${BRAND_TAGLINE}</p>
+                      <p style="margin:0;font-size:18px;font-weight:800;color:${c.primary};line-height:1.2;">${BRAND_NAME}</p>
+                      <p style="margin:4px 0 0;font-size:11px;letter-spacing:0.04em;color:${c.onSurfaceVariant};">${BRAND_TAGLINE}</p>
                     </td>
                   </tr>
                 </table>
@@ -126,6 +177,8 @@ function buildEmailHtml({
             </tr>
             <tr>
               <td style="padding:20px 32px;background-color:${c.background};border-top:1px solid ${c.outlineVariant};text-align:center;">
+                <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:${c.primary};">${BRAND_NAME}</p>
+                <p style="margin:0 0 8px;font-size:11px;color:${c.onSurfaceVariant};">${BRAND_TAGLINE}</p>
                 <p style="margin:0;font-size:12px;color:${c.onSurfaceVariant};">&copy; ${new Date().getFullYear()} ${BRAND_NAME}. All rights reserved.</p>
               </td>
             </tr>
@@ -161,28 +214,14 @@ export async function sendVerificationEmail(
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
+    const info = await sendMailWithFallback(mailOptions, verificationUrl);
     console.log('✅ Verification email sent successfully');
     console.log('📧 Message ID:', info.messageId);
     console.log('📬 Sent to:', email);
   } catch (error: unknown) {
-    const err = error as { code?: string; command?: string; message?: string };
-    console.error('❌ Failed to send verification email');
-    console.error('Error details:', {
-      code: err.code,
-      command: err.command,
-      message: err.message,
-    });
-
-    if (err.code === 'ESOCKET' || err.code === 'ECONNECTION' || err.code === 'ETIMEDOUT') {
-      console.log('\n💡 Troubleshooting tips:');
-      console.log('  1. Verify SMTP credentials in .env.local');
-      console.log('  2. Check if port 465 is not blocked by firewall');
-      console.log('  3. Verify your email password is correct');
-      console.log('  4. Try using port 587 with TLS instead of SSL');
-      console.log('  5. Consider using Gmail with App Password as alternative\n');
-    }
-
+    const err = error as { code?: string; message?: string };
+    console.error('❌ Failed to send verification email:', err.message ?? error);
+    console.log('💡 Tips: set SMTP_PORT=587 in .env.local, verify GoDaddy credentials, or use Gmail App Password.');
     throw new Error('Failed to send verification email');
   }
 }
@@ -215,23 +254,13 @@ export async function sendPasswordResetEmail(
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
+    const info = await sendMailWithFallback(mailOptions, resetUrl);
     console.log('✅ Password reset email sent successfully');
     console.log('📧 Message ID:', info.messageId);
     console.log('📬 Sent to:', email);
   } catch (error: unknown) {
-    const err = error as { code?: string; command?: string; message?: string };
-    console.error('❌ Failed to send password reset email');
-    console.error('Error details:', {
-      code: err.code,
-      command: err.command,
-      message: err.message,
-    });
-
-    if (err.code === 'ESOCKET' || err.code === 'ECONNECTION' || err.code === 'ETIMEDOUT') {
-      console.log('\n💡 Email configuration issue detected. Check SMTP settings.\n');
-    }
-
+    const err = error as { message?: string };
+    console.error('❌ Failed to send password reset email:', err.message ?? error);
     throw new Error('Failed to send password reset email');
   }
 }

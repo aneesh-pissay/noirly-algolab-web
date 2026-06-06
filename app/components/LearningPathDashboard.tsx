@@ -637,7 +637,7 @@ export default function LearningPathDashboard() {
       <Sidebar />
       <Header />
 
-      <main className="ml-[240px] pt-16 h-screen overflow-y-auto bg-background">
+      <main className="app-main h-screen overflow-y-auto bg-background">
         <div className="max-w-[1400px] mx-auto p-6 space-y-5">
           <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Learning Path' }]} />
 

@@ -10,7 +10,7 @@ export default function BubbleSortPage() {
       <Sidebar />
       <Header />
 
-      <main className="ml-[240px] pt-16 h-screen overflow-hidden flex flex-col">
+      <main className="app-main h-screen overflow-hidden flex flex-col">
         <div className="p-4">
           <Breadcrumbs
             items={[

@@ -39,7 +39,7 @@ export default function CycleSortPage() {
       <>
         <Sidebar />
         <Header />
-        <main className="ml-[240px] pt-16 h-screen flex items-center justify-center">
+        <main className="app-main h-screen flex items-center justify-center">
           <div className="text-center">
             <span className="material-symbols-outlined text-primary text-6xl animate-spin">progress_activity</span>
             <p className="text-on-surface-variant mt-4">Loading visualization...</p>
@@ -59,7 +59,7 @@ export default function CycleSortPage() {
     <>
       <Sidebar />
       <Header />
-      <main className="ml-[240px] pt-16 h-screen overflow-hidden flex flex-col">
+      <main className="app-main h-screen overflow-hidden flex flex-col">
         <div className="p-4">
           <Breadcrumbs items={[
             { label: 'Dashboard', href: '/' },

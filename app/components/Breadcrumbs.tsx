@@ -11,23 +11,23 @@ interface BreadcrumbsProps {
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
-    <nav className="flex items-center gap-2 text-sm mb-6">
+    <nav className="mb-4 flex items-center gap-2 overflow-x-auto pb-1 text-sm sm:mb-6">
       {items.map((item, index) => (
-        <div key={index} className="flex items-center gap-2">
+        <div key={index} className="flex shrink-0 items-center gap-2">
           {index > 0 && (
-            <span className="material-symbols-outlined text-on-surface-variant text-sm">
-              chevron_right
-            </span>
+            <span className="material-symbols-outlined text-sm text-on-surface-variant">chevron_right</span>
           )}
           {item.href ? (
             <Link
               href={item.href}
-              className="text-on-surface-variant hover:text-primary transition-colors font-body-md"
+              className="whitespace-nowrap font-body-md text-on-surface-variant transition-colors hover:text-primary"
             >
               {item.label}
             </Link>
           ) : (
-            <span className="text-on-surface font-body-md font-medium">{item.label}</span>
+            <span className="max-w-[12rem] truncate font-body-md font-medium text-on-surface sm:max-w-none">
+              {item.label}
+            </span>
           )}
         </div>
       ))}

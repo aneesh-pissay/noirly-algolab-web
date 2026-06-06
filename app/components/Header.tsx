@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useMobileNav } from '../contexts/MobileNavContext';
 import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const { toggle } = useMobileNav();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -42,14 +44,24 @@ export default function Header() {
     user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username;
 
   return (
-    <header className="fixed top-0 right-0 left-[240px] z-50 flex h-16 w-auto items-center justify-end border-b border-outline-variant/40 bg-background px-6">
-      <div className="flex items-center gap-3">
+    <header className="app-header z-50 flex h-16 items-center gap-3 border-b border-outline-variant/40 bg-background px-4 sm:px-6">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label="Open navigation menu"
+        className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-outline-variant/30 bg-surface-container-high text-on-surface lg:hidden"
+      >
+        <span className="material-symbols-outlined text-[22px]">menu</span>
+      </button>
+
+      <div className="ml-auto flex items-center gap-2 sm:gap-3">
         <ThemeToggle />
 
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-surface-container-high"
+            aria-label="Account menu"
+            className="group flex cursor-pointer items-center gap-2 rounded-lg p-1.5 transition-all hover:bg-surface-container-high sm:gap-3 sm:px-2 sm:py-2"
           >
             {user.avatar ? (
               <img
@@ -63,20 +75,24 @@ export default function Header() {
               </div>
             )}
 
-            <div className="flex flex-col items-start">
-              <span className="text-sm font-semibold text-on-surface">{displayName}</span>
-              <span className="text-xs text-on-surface-variant">{user.email}</span>
+            <div className="hidden min-w-0 flex-col items-start md:flex">
+              <span className="max-w-[160px] truncate text-sm font-semibold text-on-surface lg:max-w-none">
+                {displayName}
+              </span>
+              <span className="max-w-[160px] truncate text-xs text-on-surface-variant lg:max-w-none">
+                {user.email}
+              </span>
             </div>
 
-            <span className="material-symbols-outlined text-sm text-on-surface-variant transition-transform group-hover:text-primary">
+            <span className="material-symbols-outlined hidden text-sm text-on-surface-variant transition-transform group-hover:text-primary sm:inline">
               {showDropdown ? 'expand_less' : 'expand_more'}
             </span>
           </button>
 
           {showDropdown && (
-            <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container shadow-2xl">
+            <div className="absolute right-0 top-full mt-2 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container shadow-2xl">
               <div className="border-b border-outline-variant/20 bg-gradient-to-br from-primary/10 to-tertiary/10 p-4">
-                <div className="mb-3 flex items-center gap-3">
+                <div className="flex items-center gap-3">
                   {user.avatar ? (
                     <img
                       src={user.avatar}
@@ -88,9 +104,9 @@ export default function Header() {
                       {getInitials(displayName)}
                     </div>
                   )}
-                  <div className="flex-1">
-                    <p className="font-semibold text-on-surface">{displayName}</p>
-                    <p className="text-xs text-on-surface-variant">{user.email}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-on-surface">{displayName}</p>
+                    <p className="truncate text-xs text-on-surface-variant">{user.email}</p>
                   </div>
                 </div>
               </div>

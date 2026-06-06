@@ -10,7 +10,7 @@ export default function Home() {
       <Sidebar />
       <Header />
       
-      <main className="ml-[240px] pt-16 h-screen overflow-y-auto bg-background">
+      <main className="app-main h-screen overflow-y-auto bg-background">
         <div className="max-w-[1200px] mx-auto p-8 space-y-10">
           {/* HERO CARD */}
           <section className="relative group">

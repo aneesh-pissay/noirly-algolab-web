@@ -6,15 +6,18 @@ import { AuthProvider } from './contexts/AuthContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import ProgressSync from './components/ProgressSync';
 import SettingsSync from './components/SettingsSync';
+import { MobileNavProvider } from './contexts/MobileNavContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <AuthProvider>
         <SettingsProvider>
-          <SettingsSync />
-          <ProgressSync />
-          {children}
+          <MobileNavProvider>
+            <SettingsSync />
+            <ProgressSync />
+            {children}
+          </MobileNavProvider>
         </SettingsProvider>
       </AuthProvider>
     </Provider>

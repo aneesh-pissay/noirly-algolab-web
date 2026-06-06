@@ -124,6 +124,31 @@ html.light {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
+/* Authenticated app shell — full width on mobile, sidebar offset on desktop */
+.app-main {
+  margin-left: 0;
+  min-height: 100vh;
+  padding-top: 4rem;
+  background-color: var(--theme-background);
+}
+
+.app-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+@media (min-width: 1024px) {
+  .app-main {
+    margin-left: 240px;
+  }
+
+  .app-header {
+    left: 240px;
+  }
+}
+
 .glass-card {
   background: var(--theme-glass-bg);
   backdrop-filter: blur(12px);
