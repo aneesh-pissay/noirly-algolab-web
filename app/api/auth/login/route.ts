@@ -4,13 +4,34 @@ import User from '@/models/User';
 import { comparePassword, generateToken } from '@/lib/auth';
 import { initializeUserCollections } from '@/lib/user-collections';
 
+function serializeUser(user: InstanceType<typeof User>) {
+  return {
+    id: String(user._id),
+    username: user.username,
+    email: user.email,
+    isVerified: user.isVerified,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    avatar: user.avatar,
+    bio: user.bio,
+    currentLevel: user.currentLevel,
+    xp: user.xp,
+    streak: user.streak,
+    lastActiveDate: user.lastActiveDate?.toISOString?.() ?? user.lastActiveDate,
+    role: user.role,
+    createdAt: user.createdAt?.toISOString?.() ?? user.createdAt,
+    updatedAt: user.updatedAt?.toISOString?.() ?? user.updatedAt,
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
 
-    const { emailOrUsername, password } = await request.json();
+    const body = await request.json();
+    const emailOrUsername = typeof body.emailOrUsername === 'string' ? body.emailOrUsername.trim() : '';
+    const password = typeof body.password === 'string' ? body.password : '';
 
-    // Validation
     if (!emailOrUsername || !password) {
       return NextResponse.json(
         { error: 'Email/username and password are required' },
@@ -18,9 +39,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by email or username
+    const emailCandidate = emailOrUsername.toLowerCase();
+
     const user = await User.findOne({
-      $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+      $or: [{ email: emailCandidate }, { username: emailOrUsername }],
     });
 
     if (!user) {
@@ -32,13 +54,31 @@ export async function POST(request: NextRequest) {
 
     if (!user.isVerified) {
       return NextResponse.json(
-        { error: 'Please verify your email before logging in. Check your inbox for the verification link.' },
+        {
+          error:
+            'Please verify your email before logging in. Check your inbox for the verification link.',
+        },
         { status: 403 }
       );
     }
 
-    // Verify password
-    const isPasswordValid = await comparePassword(password, user.password);
+    if (!user.password) {
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
+
+    let isPasswordValid = false;
+    try {
+      isPasswordValid = await comparePassword(password, user.password);
+    } catch (compareError) {
+      console.error('Password compare error:', compareError);
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
 
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -47,37 +87,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await initializeUserCollections(user._id.toString());
+    try {
+      await initializeUserCollections(user._id.toString());
+    } catch (initError) {
+      // Don't block login if progress/settings bootstrap fails
+      console.error('initializeUserCollections failed during login:', initError);
+    }
 
-    // Generate JWT token
     const token = generateToken(user._id.toString());
 
-    // Return token in response body for client-side storage
     return NextResponse.json(
       {
         message: 'Login successful',
         token,
-        user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          isVerified: user.isVerified,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          avatar: user.avatar,
-          bio: user.bio,
-          currentLevel: user.currentLevel,
-          xp: user.xp,
-          streak: user.streak,
-          lastActiveDate: user.lastActiveDate,
-          role: user.role,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-        },
+        user: serializeUser(user),
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Login error:', error);
     return NextResponse.json(
       { error: 'Login failed. Please try again.' },

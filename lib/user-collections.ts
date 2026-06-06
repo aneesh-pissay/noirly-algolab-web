@@ -19,16 +19,23 @@ export function toUserObjectId(userId: string): mongoose.Types.ObjectId {
   return new mongoose.Types.ObjectId(userId);
 }
 
-/** Ensure the curriculum progress document exists (one per user). */
+/** Handle duplicate-key races when creating per-user curriculum progress. */
 export async function ensureUserCurriculumProgress(userId: string) {
   const objectId = toUserObjectId(userId);
 
   let doc = await UserCurriculumProgress.findOne({ userId: objectId });
-  if (!doc) {
-    doc = await UserCurriculumProgress.create(getDefaultCurriculumDoc(objectId));
-  }
+  if (doc) return doc;
 
-  return doc;
+  try {
+    doc = await UserCurriculumProgress.create(getDefaultCurriculumDoc(objectId));
+    return doc;
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && (error as { code?: number }).code === 11000) {
+      const existing = await UserCurriculumProgress.findOne({ userId: objectId });
+      if (existing) return existing;
+    }
+    throw error;
+  }
 }
 
 /** Ensure default settings exist (matches /api/user/settings behaviour). */
