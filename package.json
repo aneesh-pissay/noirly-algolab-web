@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node scripts/ensure-next-types.mjs",
+    "predev": "node scripts/ensure-next-types.mjs && node scripts/sync-favicon.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/sync-favicon.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

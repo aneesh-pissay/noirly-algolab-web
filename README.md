@@ -398,7 +398,7 @@ Standalone visual demos also live under `/visual-lab/*` (55+ pages).
 - **Fonts:** Geist Sans (body), JetBrains Mono (code), Material Symbols (icons)
 - **App shell classes:** `.app-main`, `.app-header` — responsive sidebar offset (`ml-0` → `lg:ml-[240px]`)
 
-Brand assets: `public/logo.png`, `app/components/BrandLogo.tsx`.
+Brand assets: `public/logo.png`, `app/components/BrandLogo.tsx`. Favicon is auto-synced from `public/logo.png` to `app/icon.png` on `dev` and `build`.
 
 ---
 

@@ -17,10 +17,6 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Noirly AlgoLab | Visualize logic. Master algorithms.",
   description: "Visualize logic. Master algorithms.",
-  icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
-  },
 };
 
 export const viewport = {
