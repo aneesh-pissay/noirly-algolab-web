@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 
-const IOS_BUNDLE_ID =
-  process.env.IOS_APP_BUNDLE_ID ?? 'org.reactjs.native.example.NoirlyAlgoLab';
-const APPLE_TEAM_ID = process.env.APPLE_TEAM_ID ?? '';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
-  const appIds = APPLE_TEAM_ID ? [`${APPLE_TEAM_ID}.${IOS_BUNDLE_ID}`] : [];
+  const bundleId =
+    process.env.IOS_APP_BUNDLE_ID ?? 'org.reactjs.native.example.NoirlyAlgoLab';
+  const teamId = process.env.APPLE_TEAM_ID ?? '';
+
+  const appIds = teamId ? [`${teamId}.${bundleId}`] : [];
 
   const body = {
     applinks: {
